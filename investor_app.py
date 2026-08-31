@@ -615,33 +615,57 @@ def financial_health_check(salary_inr, credit_score, has_loan, loan_amount_inr, 
 
 @st.cache_data
 def recommend_investments(risk_level, salary_inr, has_loan):
-    data = {
-        "risk_tolerance": [1,1,1,1,2,2,2,2,3,3,3,3,1,2,3],
-        "salary_level": [1,2,3,1,1,2,3,2,1,2,3,3,2,1,3],
-        "has_loan": [0,0,0,1,0,0,1,1,0,1,0,1,0,1,0],
-        "investment_type": [0,0,0,0,1,1,1,1,2,2,2,2,0,1,2]
-    }
-    df = pd.DataFrame(data)
-    clf = RandomForestClassifier(n_estimators=100, random_state=42)
-    clf.fit(df[["risk_tolerance", "salary_level", "has_loan"]], df["investment_type"])
-    salary_level = 1 if salary_inr < 400000 else (2 if salary_inr < 1200000 else 3)
-    risk_map = {"Low": 1, "Medium": 2, "High": 3}
-    input_feats = [[risk_map[risk_level], salary_level, 1 if has_loan else 0]]
-    inv_code = int(clf.predict(input_feats)[0])
-    probas = clf.predict_proba(input_feats)[0]
-    importances = clf.feature_importances_
-    expl = (f"ML Insights: Risk tolerance ({importances[0]:.2f} importance), "
-            f"Salary level ({importances[1]:.2f}), Loan ({importances[2]:.2f}). "
-            f"Confidence: {probas[inv_code]:.2%} for {['Safe', 'Moderate', 'Aggressive'][inv_code]}")
-    
     ticker_map = {
         0: ["HDFCBANK.NS", "ICICIBANK.NS", "KOTAKBANK.NS", "SBIN.NS", "AXISBANK.NS"],
         1: ["INFY.NS", "TCS.NS", "HCLTECH.NS", "LTIM.NS", "BAJFINANCE.NS"],
         2: ["ADANIENT.NS", "TATAMOTORS.NS", "BHARTIARTL.NS", "ONGC.NS", "RELIANCE.NS"]
     }
-    bucket = ["Safe", "Moderate", "Aggressive"][inv_code]
-    tickers = ticker_map[inv_code]
+    risk_level_str = str(risk_level).strip().capitalize() if risk_level else "Medium"
+    risk_map = {"Low": 1, "Medium": 2, "High": 3}
+    if risk_level_str not in risk_map:
+        risk_level_str = "Medium"
     
+    try:
+        sal = float(salary_inr)
+        if math.isnan(sal) or math.isinf(sal) or sal < 0:
+            sal = 600000.0
+    except (ValueError, TypeError):
+        sal = 600000.0
+
+    salary_level = 1 if sal < 400000 else (2 if sal < 1200000 else 3)
+    has_loan_val = 1 if bool(has_loan) else 0
+
+    try:
+        data = {
+            "risk_tolerance": [1,1,1,1,2,2,2,2,3,3,3,3,1,2,3],
+            "salary_level": [1,2,3,1,1,2,3,2,1,2,3,3,2,1,3],
+            "has_loan": [0,0,0,1,0,0,1,1,0,1,0,1,0,1,0],
+            "investment_type": [0,0,0,0,1,1,1,1,2,2,2,2,0,1,2]
+        }
+        df = pd.DataFrame(data)
+        clf = RandomForestClassifier(n_estimators=100, random_state=42)
+        clf.fit(df[["risk_tolerance", "salary_level", "has_loan"]], df["investment_type"])
+        
+        input_feats = pd.DataFrame(
+            [[risk_map[risk_level_str], salary_level, has_loan_val]],
+            columns=["risk_tolerance", "salary_level", "has_loan"]
+        )
+        pred = clf.predict(input_feats)
+        inv_code = int(pred[0]) if len(pred) > 0 and pred[0] in [0, 1, 2] else 1
+        probas = clf.predict_proba(input_feats)[0]
+        importances = clf.feature_importances_
+        
+        confidence = probas[inv_code] if inv_code < len(probas) else 1.0
+        bucket = ["Safe", "Moderate", "Aggressive"][inv_code]
+        expl = (f"ML Insights: Risk tolerance ({importances[0]:.2f} importance), "
+                f"Salary level ({importances[1]:.2f}), Loan ({importances[2]:.2f}). "
+                f"Confidence: {confidence:.2%} for {bucket}")
+    except Exception:
+        inv_code = 0 if risk_level_str == "Low" else (1 if risk_level_str == "Medium" else 2)
+        bucket = ["Safe", "Moderate", "Aggressive"][inv_code]
+        expl = f"Rule-based Insights: Profile assigned as {bucket} based on {risk_level_str} risk tolerance and current salary level."
+
+    tickers = ticker_map.get(inv_code, ticker_map[1])
     return bucket, tickers, expl
 
 @st.cache_data(ttl=300)
