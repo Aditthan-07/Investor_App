@@ -1020,6 +1020,34 @@ def block_recommended_analysis():
                 st.dataframe(pivot_table, use_container_width=True)
             
             st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
+            st.subheader("Target Asset Allocation & Risk Distribution")
+            try:
+                allocations = {
+                    "Safe": {"Large Cap Equity": 30, "Debt & Fixed Income": 40, "Gold / Commodities": 15, "Liquid Funds": 15},
+                    "Moderate": {"Large & Mid Cap Equity": 55, "Debt & Fixed Income": 25, "Gold / Commodities": 10, "Liquid Funds": 10},
+                    "Aggressive": {"High Growth & Mid Cap Equity": 75, "Sectoral & Thematic": 15, "Debt & Liquid Buffer": 10}
+                }
+                alloc = allocations.get(bucket, allocations["Moderate"])
+                fig_pie = go.Figure(data=[go.Pie(
+                    labels=list(alloc.keys()),
+                    values=list(alloc.values()),
+                    hole=.45,
+                    marker=dict(colors=['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6']),
+                    textinfo='label+percent',
+                    hoverinfo='label+value+percent'
+                )])
+                fig_pie.update_layout(
+                    title=f"Recommended Asset Allocation ({bucket} Strategy)",
+                    template="plotly_dark",
+                    height=420,
+                    showlegend=True,
+                    margin=dict(t=50, b=20, l=20, r=20)
+                )
+                st.plotly_chart(fig_pie, use_container_width=True)
+            except Exception:
+                st.info("Asset allocation visualization temporarily unavailable.")
+            
+            st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
             st.subheader("Stock Price Movements (Last 2 Weeks)")
             try:
                 fig = go.Figure()
