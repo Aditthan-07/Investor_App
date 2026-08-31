@@ -444,6 +444,24 @@ def format_price(ticker, price):
     except (ValueError, TypeError):
         return '₹N/A'
 
+import re
+
+def validate_ticker(ticker):
+    """
+    Validates a stock ticker symbol.
+    Returns: (is_valid: bool, cleaned_ticker: str, error_msg: str or None)
+    """
+    if ticker is None:
+        return False, "", "Ticker symbol cannot be empty."
+    ticker_str = str(ticker).strip().upper()
+    if not ticker_str:
+        return False, "", "Ticker symbol cannot be empty."
+    if len(ticker_str) > 20:
+        return False, ticker_str, f"Ticker symbol '{ticker_str}' is too long (maximum 20 characters)."
+    if not re.match(r'^[A-Z0-9\.\-\^=]+$', ticker_str):
+        return False, ticker_str, f"Ticker '{ticker_str}' contains invalid characters. Use letters, numbers, and allowed symbols (. - ^ =)."
+    return True, ticker_str, None
+
 TICKER_TO_NAME = {
     "HDFCBANK.NS": {"name": "HDFC Bank", "url": "https://www.hdfcbank.com"},
     "ICICIBANK.NS": {"name": "ICICI Bank", "url": "https://www.icicibank.com"},
