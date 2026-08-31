@@ -1,3 +1,9 @@
+"""
+FinSight AI - Financial Advisory & Market Intelligence Application
+A machine-learning-driven financial advisor for Indian and global markets.
+"""
+
+from typing import Tuple, List, Dict, Optional, Any, Union
 import math
 import time
 import pandas as pd
