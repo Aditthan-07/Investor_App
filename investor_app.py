@@ -685,6 +685,11 @@ def recommend_investments(risk_level, salary_inr, has_loan):
         )
         pred = clf.predict(input_feats)
         inv_code = int(pred[0]) if len(pred) > 0 and pred[0] in [0, 1, 2] else 1
+        
+        # Boundary consistency check: low salary with active loan should not be aggressive
+        if salary_level == 1 and has_loan_val == 1 and inv_code == 2:
+            inv_code = 1
+        
         probas = clf.predict_proba(input_feats)[0]
         importances = clf.feature_importances_
         
@@ -695,6 +700,8 @@ def recommend_investments(risk_level, salary_inr, has_loan):
                 f"Confidence: {confidence:.2%} for {bucket}")
     except Exception:
         inv_code = 0 if risk_level_str == "Low" else (1 if risk_level_str == "Medium" else 2)
+        if salary_level == 1 and has_loan_val == 1 and inv_code == 2:
+            inv_code = 1
         bucket = ["Safe", "Moderate", "Aggressive"][inv_code]
         expl = f"Rule-based Insights: Profile assigned as {bucket} based on {risk_level_str} risk tolerance and current salary level."
 
