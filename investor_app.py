@@ -419,16 +419,30 @@ st.markdown('<div class="sub">India-focused: INR, stocks (IN+global), ML insight
 
 def inr(x):
     try:
+        if x is None:
+            return "₹—"
         x = float(x)
-    except:
+        if math.isnan(x) or math.isinf(x):
+            return "₹—"
+    except (ValueError, TypeError):
         return "₹—"
+    is_negative = x < 0
     absx = abs(x)
-    if absx >= 1e7: return f"₹{x/1e7:.2f} Cr"
-    if absx >= 1e5: return f"₹{x/1e5:.2f} L"
-    return f"₹{x:,.2f}"
+    sign = "-" if is_negative else ""
+    if absx >= 1e7: return f"{sign}₹{absx/1e7:.2f} Cr"
+    if absx >= 1e5: return f"{sign}₹{absx/1e5:.2f} L"
+    return f"{sign}₹{absx:,.2f}"
 
 def format_price(ticker, price):
-    return inr(price) if price != 'N/A' else '₹N/A'
+    if price is None or price == 'N/A' or price == '':
+        return '₹N/A'
+    try:
+        p = float(price)
+        if math.isnan(p) or math.isinf(p) or p < 0:
+            return '₹N/A'
+        return inr(p)
+    except (ValueError, TypeError):
+        return '₹N/A'
 
 TICKER_TO_NAME = {
     "HDFCBANK.NS": {"name": "HDFC Bank", "url": "https://www.hdfcbank.com"},
