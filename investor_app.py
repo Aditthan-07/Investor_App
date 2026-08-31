@@ -542,13 +542,71 @@ def get_market_update():
         return "N/A", 0.0, f"Failed to fetch Nifty 50 data. Check connectivity or visit external sources like Groww or Moneycontrol."
 
 def financial_health_check(salary_inr, credit_score, has_loan, loan_amount_inr, emergency_fund=True):
-    if salary_inr < 0 or credit_score < 300 or credit_score > 900 or loan_amount_inr < 0:
-        raise ValueError("Invalid input values.")
-    salary_score = 0 if salary_inr < 300000 else (1 if salary_inr < 800000 else 2)
-    credit_score_val = 0 if credit_score < 600 else (1 if credit_score < 750 else 2)
-    loan_score = 2 if not has_loan else (0 if loan_amount_inr > salary_inr * 5 else (1 if loan_amount_inr > salary_inr * 2 else 2))
+    # Validate salary
+    try:
+        salary_inr = float(salary_inr)
+        if math.isnan(salary_inr) or math.isinf(salary_inr) or salary_inr < 0:
+            raise ValueError("Annual salary must be a valid non-negative number.")
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Invalid salary: {e}")
+    
+    # Validate credit score
+    try:
+        credit_score = float(credit_score)
+        if math.isnan(credit_score) or math.isinf(credit_score) or credit_score < 300 or credit_score > 900:
+            raise ValueError("Credit score must be between 300 and 900.")
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Invalid credit score: {e}")
+    
+    # Validate loan parameters
+    has_loan = bool(has_loan)
+    try:
+        loan_amount_inr = float(loan_amount_inr)
+        if math.isnan(loan_amount_inr) or math.isinf(loan_amount_inr) or loan_amount_inr < 0:
+            raise ValueError("Loan amount must be a valid non-negative number.")
+    except (ValueError, TypeError) as e:
+        raise ValueError(f"Invalid loan amount: {e}")
+    
+    if not has_loan:
+        loan_amount_inr = 0.0
+
+    if salary_inr > 1e11:
+        raise ValueError("Salary input exceeds realistic maximum limit (₹10,000 Cr).")
+    if loan_amount_inr > 1e11:
+        raise ValueError("Loan amount exceeds realistic maximum limit (₹10,000 Cr).")
+
+    # Salary Score
+    if salary_inr < 300000:
+        salary_score = 0
+    elif salary_inr < 800000:
+        salary_score = 1
+    else:
+        salary_score = 2
+
+    # Credit Score
+    if credit_score < 600:
+        credit_score_val = 0
+    elif credit_score < 750:
+        credit_score_val = 1
+    else:
+        credit_score_val = 2
+
+    # Loan Score with zero-income handling
+    if not has_loan or loan_amount_inr == 0:
+        loan_score = 2
+    elif salary_inr == 0:
+        loan_score = 0
+    else:
+        if loan_amount_inr > salary_inr * 5:
+            loan_score = 0
+        elif loan_amount_inr > salary_inr * 2:
+            loan_score = 1
+        else:
+            loan_score = 2
+
     emergency_bonus = 1 if emergency_fund else 0
     total = salary_score + credit_score_val + loan_score + emergency_bonus
+
     if total <= 3:
         return "Poor", "Financial health: Poor. Focus on basics—emergency fund, debt reduction. Avoid equities."
     elif total <= 5:
