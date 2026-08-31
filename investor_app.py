@@ -734,6 +734,16 @@ def get_stock_data(ticker, period="2wk"):
     if not is_valid:
         return 'N/A', 0.0, pd.Series(dtype=float), f"Invalid stock symbol '{ticker}': {err_msg}"
     
+    # Check session state cache to prevent redundant fetches
+    cache_key = f"_stock_cache_{clean_ticker}_{period}"
+    try:
+        if hasattr(st, 'session_state') and cache_key in st.session_state:
+            cached_data, timestamp = st.session_state[cache_key]
+            if time.time() - timestamp < 180:
+                return cached_data
+    except Exception:
+        pass
+
     company_name = TICKER_TO_NAME.get(clean_ticker, {'name': clean_ticker})['name']
     
     for attempt in range(3):
@@ -753,10 +763,12 @@ def get_stock_data(ticker, period="2wk"):
                 price = float(hist.iloc[-1])
 
             if price == 'N/A' or price is None or (isinstance(price, (int, float)) and (math.isnan(price) or price <= 0)):
-                return 'N/A', 0.0, hist if not hist.empty else pd.Series(dtype=float), f"No current price data available for {company_name} ({clean_ticker})."
+                res = ('N/A', 0.0, hist if not hist.empty else pd.Series(dtype=float), f"No current price data available for {company_name} ({clean_ticker}).")
+                return res
 
             if hist.empty or len(hist) < 2:
-                return float(price), 0.0, hist if not hist.empty else pd.Series(dtype=float), f"Insufficient historical data for {company_name} ({clean_ticker})."
+                res = (float(price), 0.0, hist if not hist.empty else pd.Series(dtype=float), f"Insufficient historical data for {company_name} ({clean_ticker}).")
+                return res
 
             p_start = float(hist.iloc[0])
             p_end = float(hist.iloc[-1])
@@ -765,7 +777,13 @@ def get_stock_data(ticker, period="2wk"):
             else:
                 change = 0.0
 
-            return float(price), float(change), hist, None
+            res = (float(price), float(change), hist, None)
+            try:
+                if hasattr(st, 'session_state'):
+                    st.session_state[cache_key] = (res, time.time())
+            except Exception:
+                pass
+            return res
         except (urllib.error.URLError, socket.gaierror) as e:
             if attempt < 2:
                 time.sleep(1.5 ** attempt)
