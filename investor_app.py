@@ -759,8 +759,16 @@ def block_headlines():
         with st.spinner('Fetching latest market updates...'):
             tag, score, heads = market_sentiment()
             nifty_price, nifty_change, nifty_summary = get_market_update()
-            nifty = yf.Ticker("^NSEI")
-            nifty_hist = nifty.history(period="2wk", interval="1d")['Close']
+            try:
+                nifty = yf.Ticker("^NSEI")
+                hist_df = nifty.history(period="2wk", interval="1d")
+                if hist_df is not None and not hist_df.empty and 'Close' in hist_df.columns:
+                    nifty_hist = hist_df['Close'].dropna()
+                    nifty_hist = pd.to_numeric(nifty_hist, errors='coerce').dropna()
+                else:
+                    nifty_hist = pd.Series(dtype=float)
+            except Exception:
+                nifty_hist = pd.Series(dtype=float)
             st.session_state.headlines = (tag, score, heads, nifty_price, nifty_change, nifty_summary, nifty_hist)
             st.session_state.headlines_time = current_time
     else:
@@ -777,41 +785,44 @@ def block_headlines():
     else:
         st.error(nifty_summary)
     
-    if not nifty_hist.empty:
-        st.subheader("Nifty 50 Price Movement (Last 2 Weeks)")
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(
-            x=nifty_hist.index,
-            y=nifty_hist,
-            mode='lines+markers+text',
-            name='Nifty 50',
-            line=dict(width=3, color='#1f77b4'),
-            marker=dict(size=8, opacity=0.7),
-            text=[f"₹{v:,.2f}" for v in nifty_hist],
-            textposition="top center",
-            textfont=dict(size=10),
-            hovertemplate='Price: ₹%{y:,.2f}<extra></extra>'
-        ))
-        fig.update_layout(
-            title="Nifty 50 Price Movement (Last 2 Weeks)",
-            xaxis_title="Date",
-            yaxis_title="Index Value (₹)",
-            width=1200,
-            height=600,
-            template="plotly_dark",
-            showlegend=True,
-            hovermode="x unified",
-            xaxis=dict(
-                type="date",
-                tickformat="%b %d",
-                dtick=86400000.0
-            ),
-            yaxis=dict(
-                autorange=True
+    if nifty_hist is not None and not nifty_hist.empty and len(nifty_hist) > 0:
+        try:
+            st.subheader("Nifty 50 Price Movement (Last 2 Weeks)")
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=nifty_hist.index,
+                y=nifty_hist,
+                mode='lines+markers+text',
+                name='Nifty 50',
+                line=dict(width=3, color='#1f77b4'),
+                marker=dict(size=8, opacity=0.7),
+                text=[f"₹{v:,.2f}" for v in nifty_hist],
+                textposition="top center",
+                textfont=dict(size=10),
+                hovertemplate='Price: ₹%{y:,.2f}<extra></extra>'
+            ))
+            fig.update_layout(
+                title="Nifty 50 Price Movement (Last 2 Weeks)",
+                xaxis_title="Date",
+                yaxis_title="Index Value (₹)",
+                width=1200,
+                height=600,
+                template="plotly_dark",
+                showlegend=True,
+                hovermode="x unified",
+                xaxis=dict(
+                    type="date",
+                    tickformat="%b %d",
+                    dtick=86400000.0
+                ),
+                yaxis=dict(
+                    autorange=True
+                )
             )
-        )
-        st.plotly_chart(fig, use_container_width=True)
-        st.markdown("For additional Nifty 50 chart insights, visit [Groww Nifty Chart](https://groww.in/charts/indices/nifty)", unsafe_allow_html=True)
+            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("For additional Nifty 50 chart insights, visit [Groww Nifty Chart](https://groww.in/charts/indices/nifty)", unsafe_allow_html=True)
+        except Exception:
+            st.warning("Chart visualization temporarily unavailable for Nifty 50.")
     
     st.subheader("Latest Market News")
     if score > 0.1:
@@ -822,10 +833,11 @@ def block_headlines():
         st.info(f"Market Sentiment: {tag}  •  Score: {score:.2f}")
     
     for i, h in enumerate(heads):
-        with st.expander(f"**{h['title']}**", expanded=False):
-            if h["link"]:
+        title = h.get('title', 'Market News')
+        with st.expander(f"**{title}**", expanded=False):
+            if h.get("link"):
                 st.markdown(f"[Read more]({h['link']})")
-            if h["published"]:
+            if h.get("published"):
                 st.caption(h["published"])
 
 def block_fin_health():
@@ -843,7 +855,7 @@ def block_fin_health():
             format="%d",
             help="Enter your annual salary in INR."
         )
-        if st.session_state.fin_salary_input != st.session_state.user_data.get('salary', 600000):
+        if st.session_state.get('fin_salary_input') is not None and st.session_state.get('fin_salary_input') != st.session_state.user_data.get('salary', 600000):
             st.session_state.user_data['salary'] = salary
     with c2:
         credit = st.slider("Credit Score", 300, 900, st.session_state.user_data.get('credit_score', 740), key="fin_credit_slider", disabled=disabled, help="Your CIBIL or equivalent credit score.")
@@ -885,7 +897,9 @@ def block_fin_health():
                 else:
                     st.success(msg)
             except ValueError as e:
-                st.error(f"Input error: {str(e)}")
+                st.error(f"Input validation error: {str(e)}")
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {str(e)}")
             finally:
                 st.session_state.loading = False
 
@@ -955,7 +969,7 @@ def block_recommended_analysis():
                 price, two_week_change, hist, error = get_stock_data(t, period="1mo")
                 if error:
                     errors.append(error)
-                if price != 'N/A' and not hist.empty:
+                if price != 'N/A' and hist is not None and not hist.empty:
                     company_info = TICKER_TO_NAME.get(t, {'name': t, 'url': '#'})
                     color = "#10b981" if two_week_change >= 0 else "#e74c3c"
                     stock_data[t] = {
@@ -982,57 +996,68 @@ def block_recommended_analysis():
             
             daily_df = pd.DataFrame()
             for t in valid_tickers:
-                if not daily_data[t].empty:
+                if t in daily_data and not daily_data[t].empty:
                     temp_df = daily_data[t].reset_index()
+                    temp_df.columns = ['Date', 'Close'] if len(temp_df.columns) == 2 else temp_df.columns
                     temp_df['Company'] = TICKER_TO_NAME.get(t, {'name': t})['name']
-                    temp_df = temp_df[['Company', 'Date', 'Close']]
-                    temp_df['Date'] = temp_df['Date'].dt.strftime('%Y-%m-%d')
-                    daily_df = pd.concat([daily_df, temp_df])
+                    if 'Date' in temp_df.columns and 'Close' in temp_df.columns:
+                        temp_df = temp_df[['Company', 'Date', 'Close']]
+                        temp_df['Date'] = pd.to_datetime(temp_df['Date']).dt.strftime('%Y-%m-%d')
+                        daily_df = pd.concat([daily_df, temp_df], ignore_index=True)
             
             if not daily_df.empty:
                 st.subheader("Daily Closing Prices (Last 20 Days)")
                 display_df = daily_df.copy()
                 display_df['Close'] = display_df['Close'].apply(lambda x: inr(x))
-                st.dataframe(display_df.pivot_table(index='Date', columns='Company', values='Close', aggfunc='first').style.background_gradient(cmap='viridis'), use_container_width=True)
+                pivot_table = display_df.pivot_table(index='Date', columns='Company', values='Close', aggfunc='first')
+                st.dataframe(pivot_table, use_container_width=True)
             
             st.markdown('<div class="spacer"></div>', unsafe_allow_html=True)
             st.subheader("Stock Price Movements (Last 2 Weeks)")
-            fig = go.Figure()
-            dash_styles = ['solid', 'dash', 'dot', 'dashdot', 'longdash', 'longdashdot']
-            for i, t in enumerate(valid_tickers):
-                _, _, hist, _ = get_stock_data(t, period="2wk")
-                if not hist.empty:
-                    fig.add_trace(go.Scatter(
-                        x=hist.index,
-                        y=hist,
-                        mode='lines+markers+text',
-                        name=TICKER_TO_NAME.get(t, {'name': t})['name'],
-                        line=dict(width=3, dash=dash_styles[i % len(dash_styles)]),
-                        marker=dict(size=8, opacity=0.7),
-                        text=[f"₹{v:,.2f}" for v in hist],
-                        textposition="top center",
-                        textfont=dict(size=10),
-                        hovertemplate='Price: ₹%{y:,.2f}<extra></extra>'
-                    ))
-            fig.update_layout(
-                title="Stock Price Movements (Last 2 Weeks)",
-                xaxis_title="Date",
-                yaxis_title="Price (₹)",
-                width=1200,
-                height=600,
-                template="plotly_dark",
-                showlegend=True,
-                hovermode="x unified",
-                xaxis=dict(
-                    type="date",
-                    tickformat="%b %d",
-                    dtick=86400000.0
-                ),
-                yaxis=dict(
-                    autorange=True
-                )
-            )
-            st.plotly_chart(fig, use_container_width=True)
+            try:
+                fig = go.Figure()
+                dash_styles = ['solid', 'dash', 'dot', 'dashdot', 'longdash', 'longdashdot']
+                has_chart_traces = False
+                for i, t in enumerate(valid_tickers):
+                    _, _, hist, _ = get_stock_data(t, period="2wk")
+                    if hist is not None and not hist.empty:
+                        clean_h = hist.dropna()
+                        if not clean_h.empty:
+                            fig.add_trace(go.Scatter(
+                                x=clean_h.index,
+                                y=clean_h,
+                                mode='lines+markers+text',
+                                name=TICKER_TO_NAME.get(t, {'name': t})['name'],
+                                line=dict(width=3, dash=dash_styles[i % len(dash_styles)]),
+                                marker=dict(size=8, opacity=0.7),
+                                text=[f"₹{v:,.2f}" for v in clean_h],
+                                textposition="top center",
+                                textfont=dict(size=10),
+                                hovertemplate='Price: ₹%{y:,.2f}<extra></extra>'
+                            ))
+                            has_chart_traces = True
+                if has_chart_traces:
+                    fig.update_layout(
+                        title="Stock Price Movements (Last 2 Weeks)",
+                        xaxis_title="Date",
+                        yaxis_title="Price (₹)",
+                        width=1200,
+                        height=600,
+                        template="plotly_dark",
+                        showlegend=True,
+                        hovermode="x unified",
+                        xaxis=dict(
+                            type="date",
+                            tickformat="%b %d",
+                            dtick=86400000.0
+                        ),
+                        yaxis=dict(
+                            autorange=True
+                        )
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+            except Exception:
+                st.warning("Chart visualization could not be generated for current stocks.")
             st.session_state.loading = False
 
 def block_resources():
@@ -1066,8 +1091,20 @@ def detect_intent(message: str):
 
 def extract_val(pattern, default, multiplier=1):
     import re
-    match = re.search(pattern, m)
-    return float(match.group(1)) * multiplier if match else default
+    try:
+        match = re.search(pattern, m)
+        if match:
+            for g in reversed(match.groups()):
+                if g is not None and g != '':
+                    try:
+                        val = float(g)
+                        if not math.isnan(val) and not math.isinf(val) and val >= 0:
+                            return val * multiplier
+                    except ValueError:
+                        continue
+        return default
+    except Exception:
+        return default
 
 def parse_chat(message: str):
     global m
@@ -1087,28 +1124,34 @@ def parse_chat(message: str):
         return out
     
     if intent == "health":
-        salary = st.session_state.user_data.get('salary', extract_val(r"(salary|income|earning)[^\d]*(\d+(\.\d+)?)", 600000))
+        salary = extract_val(r"(salary|income|earning)[^\d]*(\d+(\.\d+)?)", st.session_state.user_data.get('salary', 600000))
         if "l" in m or "lakh" in m: salary *= 100000
-        credit = st.session_state.user_data.get('credit_score', extract_val(r"(credit|cibil)[^\d]*(\d{3})", 740))
-        loan_amt = st.session_state.user_data.get('loan_amount', extract_val(r"(loan|debt)[^\d]*(\d+(\.\d+)?)", 0))
+        credit = extract_val(r"(credit|cibil)[^\d]*(\d{3})", st.session_state.user_data.get('credit_score', 740))
+        loan_amt = extract_val(r"(loan|debt)[^\d]*(\d+(\.\d+)?)", st.session_state.user_data.get('loan_amount', 0))
         if "l" in m or "lakh" in m: loan_amt *= 100000
-        has_loan = st.session_state.user_data.get('has_loan', loan_amt > 0)
-        emergency = st.session_state.user_data.get('emergency_fund', "yes" in m or "fund" in m)
-        label, msg = financial_health_check(salary, credit, has_loan, loan_amt, emergency)
-        st.session_state.financial_health = label
-        st.session_state.can_continue = label in ["Fair", "Good"]
-        st.session_state.locked = label == "Poor"
-        st.session_state.user_data.update({
-            'salary': salary,
-            'has_loan': has_loan,
-            'credit_score': credit,
-            'loan_amount': loan_amt,
-            'emergency_fund': emergency
-        })
-        if label == "Poor":
-            st.markdown('<div class="hacker-alert">ALERT! ACCESS DENIED — POOR HEALTH DETECTED.</div>', unsafe_allow_html=True)
-        return (f"{msg}\nDetails: Salary {inr(salary)}, Credit Score {credit}, "
-                f"Loan {inr(loan_amt)}, Emergency Fund: {'Yes' if emergency else 'No'}")
+        has_loan = loan_amt > 0 if ("no loan" not in m and "without loan" not in m) else False
+        emergency = "yes" in m or "fund" in m or st.session_state.user_data.get('emergency_fund', True)
+        
+        try:
+            label, msg = financial_health_check(salary, credit, has_loan, loan_amt, emergency)
+            st.session_state.financial_health = label
+            st.session_state.can_continue = label in ["Fair", "Good"]
+            st.session_state.locked = label == "Poor"
+            st.session_state.user_data.update({
+                'salary': salary,
+                'has_loan': has_loan,
+                'credit_score': credit,
+                'loan_amount': loan_amt,
+                'emergency_fund': emergency
+            })
+            if label == "Poor":
+                st.markdown('<div class="hacker-alert">ALERT! ACCESS DENIED — POOR HEALTH DETECTED.</div>', unsafe_allow_html=True)
+            return (f"{msg}\nDetails: Salary {inr(salary)}, Credit Score {int(credit)}, "
+                    f"Loan {inr(loan_amt)}, Emergency Fund: {'Yes' if emergency else 'No'}")
+        except ValueError as e:
+            return f"Input error: {str(e)}"
+        except Exception as e:
+            return f"Unable to assess financial health: {str(e)}"
     
     if intent == "recommend":
         risk = "Medium"
@@ -1161,21 +1204,31 @@ def parse_chat(message: str):
     
     if intent == "price":
         import re
-        asset = re.search(r"(gold|silver|[a-zA-Z0-9\.]+)", m)
-        if asset:
-            asset = asset.group(1).upper()
+        asset_match = re.search(r"(gold|silver|[a-zA-Z0-9\.\^=]+)", m)
+        if asset_match:
+            asset = asset_match.group(1).upper()
             if asset == "GOLD":
                 price, _, _, error = get_stock_data("GC=F", period="2wk")
                 if error:
                     return f"Failed to fetch gold price: {error}"
                 return f"Current gold price (based on futures): {format_price('GC=F', price)}. For accurate Indian rates, check external sources."
-            else:
-                price, _, _, error = get_stock_data(asset if asset.endswith('.NS') else asset, period="2wk")
+            elif asset == "SILVER":
+                price, _, _, error = get_stock_data("SI=F", period="2wk")
                 if error:
-                    return f"Failed to fetch price for {TICKER_TO_NAME.get(asset, {'name': asset})['name']} ({asset}): {error}"
-                company_info = TICKER_TO_NAME.get(asset, {'name': asset, 'url': '#'})
-                return f"Current price for {company_info['name']} ({asset}): {format_price(asset, price)}"
-        return "Could you specify the stock or asset (e.g., 'gold rate' or 'AAPL price')?"
+                    return f"Failed to fetch silver price: {error}"
+                return f"Current silver price (based on futures): {format_price('SI=F', price)}. For accurate Indian rates, check external sources."
+            else:
+                ticker_to_fetch = asset if (asset.endswith('.NS') or '.' in asset or asset.startswith('^') or '=' in asset) else f"{asset}.NS"
+                price, _, _, error = get_stock_data(ticker_to_fetch, period="2wk")
+                if error and not asset.endswith('.NS'):
+                    price_raw, _, _, error_raw = get_stock_data(asset, period="2wk")
+                    if not error_raw and price_raw != 'N/A':
+                        price, error, ticker_to_fetch = price_raw, None, asset
+                if error:
+                    return f"Failed to fetch price for {TICKER_TO_NAME.get(ticker_to_fetch, {'name': ticker_to_fetch})['name']} ({ticker_to_fetch}): {error}"
+                company_info = TICKER_TO_NAME.get(ticker_to_fetch, {'name': ticker_to_fetch, 'url': '#'})
+                return f"Current price for {company_info['name']} ({ticker_to_fetch}): {format_price(ticker_to_fetch, price)}"
+        return "Could you specify the stock or asset (e.g., 'gold rate', 'TCS price', or 'AAPL price')?"
     
     if "hack override" in m:
         st.session_state.locked = False
