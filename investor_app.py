@@ -715,15 +715,23 @@ def recommend_investments(risk_level, salary_inr, has_loan):
         
         confidence = probas[inv_code] if inv_code < len(probas) else 1.0
         bucket = ["Safe", "Moderate", "Aggressive"][inv_code]
+        
+        advice = ""
+        if confidence < 0.65:
+            advice = " • Tip: Inputs are near category boundaries; re-evaluating risk preference or debt ratio may optimize your profile."
+        elif has_loan_val == 1 and inv_code > 0:
+            advice = " • Note: Maintaining an active debt-service cushion is recommended alongside investments."
+
         expl = (f"ML Insights: Risk tolerance ({importances[0]:.2f} importance), "
                 f"Salary level ({importances[1]:.2f}), Loan ({importances[2]:.2f}). "
-                f"Confidence: {confidence:.2%} for {bucket}")
-    except Exception:
+                f"Confidence: {confidence:.2%} for {bucket}{advice}")
+    except Exception as e:
         inv_code = 0 if risk_level_str == "Low" else (1 if risk_level_str == "Medium" else 2)
         if salary_level == 1 and has_loan_val == 1 and inv_code == 2:
             inv_code = 1
         bucket = ["Safe", "Moderate", "Aggressive"][inv_code]
-        expl = f"Rule-based Insights: Profile assigned as {bucket} based on {risk_level_str} risk tolerance and current salary level."
+        expl = (f"Rule-based Insights: Profile assigned as {bucket} based on {risk_level_str} risk tolerance and salary tier. "
+                f"(Fallback applied due to model pipeline variance).")
 
     tickers = ticker_map.get(inv_code, ticker_map[1])
     return bucket, tickers, expl
