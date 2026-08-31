@@ -525,26 +525,46 @@ def fetch_headlines(query="indian stock market OR nifty OR sensex", max_items=8)
             {"title": "Economic review: Domestic liquidity remains stable", "link": "", "published": ""}
         ]
 
+def analyze_text_sentiment(text: str) -> float:
+    """
+    Safely calculates sentiment polarity for arbitrary text inputs.
+    Handles empty, whitespace, non-ASCII, and single-word tokens.
+    """
+    if not text or not isinstance(text, str):
+        return 0.0
+    clean_text = text.strip()
+    if len(clean_text) < 3:
+        return 0.0
+    try:
+        blob = TextBlob(clean_text)
+        polarity = float(blob.sentiment.polarity)
+        return 0.0 if math.isnan(polarity) or math.isinf(polarity) else max(-1.0, min(1.0, polarity))
+    except Exception:
+        return 0.0
+
 @st.cache_data(ttl=300)
 def market_sentiment():
     try:
         heads = fetch_headlines()
-        titles = [h["title"] for h in heads if h and h.get("title")]
-        if not titles:
+        if not heads or not isinstance(heads, list):
+            return "Neutral 😐", 0.0, [{"title": "Market sentiment data temporarily unavailable", "link": "", "published": ""}]
+        
+        valid_heads = [h for h in heads if isinstance(h, dict) and h.get("title")]
+        if not valid_heads:
             return "Neutral 😐", 0.0, heads
+            
         polarities = []
-        for s in titles:
-            try:
-                p = float(TextBlob(s).sentiment.polarity)
-                if not math.isnan(p):
-                    polarities.append(p)
-            except Exception:
-                continue
+        for h in valid_heads:
+            title = h.get("title", "")
+            pol = analyze_text_sentiment(title)
+            polarities.append(pol)
+            
         score = float(np.mean(polarities)) if polarities else 0.0
-        if math.isnan(score):
+        if math.isnan(score) or math.isinf(score):
             score = 0.0
-        tag = "Bullish 🐂" if score > 0.1 else ("Bearish 🐻" if score < -0.1 else "Neutral 😐")
-        return tag, score, heads
+            
+        tag = "Bullish 🐂" if score > 0.08 else ("Bearish 🐻" if score < -0.08 else "Neutral 😐")
+        return tag, score, valid_heads
     except Exception:
         return "Neutral 😐", 0.0, [{"title": "Market sentiment data temporarily unavailable", "link": "", "published": ""}]
 
