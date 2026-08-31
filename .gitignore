@@ -1,1 +1,18 @@
-/venv
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.class
+
+# Streamlit session and credentials
+.streamlit/secrets.toml
+
+# Distribution / packaging
+.env
+.venv
+env/
+venv/
+ENV/
+
+# OS specific files
+.DS_Store
+Thumbs.db
