@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python virtual environments & packages
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Node dependencies
+node_modules/
+*/node_modules/
+apps/web/node_modules/
+apps/mobile/node_modules/
+
+# Next.js build output
+.next/
+apps/web/.next/
+out/
+apps/web/out/
+
+# Expo / React Native
+.expo/
+apps/mobile/.expo/
+web-build/
+apps/mobile/web-build/
+
+# Local databases, caches & test outputs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+backend/finsight.db
+backend/smoke_test_results.json
+.pytest_cache/
+coverage/
+
+# Streamlit session and credentials
+.streamlit/secrets.toml
+.env
+.env.*
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Local scratch notes
+FinSight AI.txt
