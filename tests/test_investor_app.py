@@ -6,18 +6,18 @@ import re
 def inr(x):
     try:
         if x is None:
-            return "?�"
+            return "₹—"
         x = float(x)
         if math.isnan(x) or math.isinf(x):
-            return "?�"
+            return "₹—"
     except (ValueError, TypeError):
-        return "?�"
+        return "₹—"
     is_negative = x < 0
     absx = abs(x)
     sign = "-" if is_negative else ""
-    if absx >= 1e7: return f"{sign}?{absx/1e7:.2f} Cr"
-    if absx >= 1e5: return f"{sign}?{absx/1e5:.2f} L"
-    return f"{sign}?{absx:,.2f}"
+    if absx >= 1e7: return f"{sign}₹{absx/1e7:.2f} Cr"
+    if absx >= 1e5: return f"{sign}₹{absx/1e5:.2f} L"
+    return f"{sign}₹{absx:,.2f}"
 
 def validate_ticker(ticker):
     if ticker is None:
@@ -33,11 +33,11 @@ def validate_ticker(ticker):
 
 class TestFinSightCore(unittest.TestCase):
     def test_inr_formatting(self):
-        self.assertEqual(inr(0), "?0.00")
-        self.assertEqual(inr(150000), "?1.50 L")
-        self.assertEqual(inr(25000000), "?2.50 Cr")
-        self.assertEqual(inr(-50000), "-?50,000.00")
-        self.assertEqual(inr(None), "?�")
+        self.assertEqual(inr(0), "₹0.00")
+        self.assertEqual(inr(150000), "₹1.50 L")
+        self.assertEqual(inr(25000000), "₹2.50 Cr")
+        self.assertEqual(inr(-50000), "-₹50,000.00")
+        self.assertEqual(inr(None), "₹—")
 
     def test_ticker_validation(self):
         self.assertTrue(validate_ticker("TCS.NS")[0])
