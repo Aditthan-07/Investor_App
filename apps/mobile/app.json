@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "FinSight AI",
+    "slug": "finsight-mobile",
+    "scheme": "finsight",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0C0D10"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0C0D10"
+      }
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
