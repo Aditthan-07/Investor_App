@@ -21,3 +21,15 @@
 | Step 03: Macro Allocation | Market Pulse Live Feed | AI Financial Co-Pilot |
 | :---: | :---: | :---: |
 | <img src="docs/assets/mobile_step3_allocation.png" width="260" alt="Asset Allocation"/> | <img src="docs/assets/mobile_market_pulse.png" width="260" alt="Market Pulse"/> | <img src="docs/assets/mobile_copilot_chat.png" width="260" alt="AI Co-Pilot"/> |
+
+
+---
+
+## 🛡️ Step 01: Foundational Solvency & Balance Sheet Audit
+
+The application enforces a **clean-slate initialization**—no synthetic mock data or pre-assumed financial standing. Users input authentic figures with instant Indian numbering word previews (`₹ Lakhs / Cr`):
+
+- **Debt & Liability Capacity:** Evaluates fixed obligations, active loan EMIs, and debt-to-income (DTI) health with quick-increment pills (`+₹1 Lakh`, `+₹5 Lakh`, `+₹10 Lakh`).
+- **Credit Standing:** Credit bureau scoring normalized with color-coded risk bands (Poor, Fair, Prime).
+- **5-Axis Solvency Polygon Radar:** Dynamic SVG polygon plotting **Solvency (80%)**, **Liquidity (20%)**, **Debt Safety (50%)**, **Credit Score (47%)**, and **Horizon (49%)**.
+- **Vulnerable Solvency Safety Intercept:** If personal metrics indicate financial vulnerability (`POOR` tier), an automated risk confirmation modal intercepts capital deployment into volatile equities until emergency cash runways are established.
