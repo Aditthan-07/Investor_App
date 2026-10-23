@@ -68,3 +68,14 @@ A dedicated real-time terminal built directly into the mobile experience:
 - **14-Day Trajectory Sparklines:** Dynamic SVG wave trendline visualization capturing momentum, support levels, and consolidation patterns.
 - **Domestic Sentiment Index:** Automated aggregation of market breadth indicators classifying market bias as Bullish, Neutral, or Risk-Off.
 - **Integrated News Feed:** Institutional wire summaries with modal reader support and external publisher fallback links (`Read Source ↗`).
+
+
+---
+
+## 🤖 Context-Aware AI Financial Co-Pilot
+
+FinSight AI includes an embedded conversational assistant:
+
+- **Balance Sheet Memory:** Directly reads personal solvency outcomes to tailor recommendations without re-prompting.
+- **Quantitative Inquiry:** Real-time analysis of valuation multiples (P/E, P/B, EV/EBITDA), tax provisions (LTCG / STCG under Indian tax laws), and asset allocation trade-offs.
+- **Non-Custodial Guidance:** Advisory strictly focused on capital allocation discipline, liquidity safeguards, and risk management without unauthorized execution.
