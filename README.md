@@ -56,3 +56,15 @@ Step 3 establishes the portfolio's top-level capital framework:
 - **Segmented SVG Donut Ring:** Multi-colored asset distribution dividing total net worth across Domestic Equities (Emerald `#10B981`), Sovereign Debt/Bonds (Champagne Gold `#C5A880`), Commodities/Gold (Warm Amber `#F59E0B`), and Liquid Cash Reserves (Slate Blue `#64748B`).
 - **Institutional Rebalancing Rules:** Automated threshold parameters triggering rebalancing notifications whenever an asset class deviates by more than **±5.0%** from target weight.
 - **Drift Tolerance Policies:** Preserves capital during market volatility by preventing premature churning while systematically locking in equity profits.
+
+
+---
+
+## ⚡ Market Pulse & Real-Time Intelligence
+
+A dedicated real-time terminal built directly into the mobile experience:
+
+- **Live Benchmark Tracking:** Continuous NIFTY 50 price quotes, daily delta points, and percentage movements.
+- **14-Day Trajectory Sparklines:** Dynamic SVG wave trendline visualization capturing momentum, support levels, and consolidation patterns.
+- **Domestic Sentiment Index:** Automated aggregation of market breadth indicators classifying market bias as Bullish, Neutral, or Risk-Off.
+- **Integrated News Feed:** Institutional wire summaries with modal reader support and external publisher fallback links (`Read Source ↗`).
