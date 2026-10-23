@@ -33,3 +33,15 @@ The application enforces a **clean-slate initialization**—no synthetic mock da
 - **Credit Standing:** Credit bureau scoring normalized with color-coded risk bands (Poor, Fair, Prime).
 - **5-Axis Solvency Polygon Radar:** Dynamic SVG polygon plotting **Solvency (80%)**, **Liquidity (20%)**, **Debt Safety (50%)**, **Credit Score (47%)**, and **Horizon (49%)**.
 - **Vulnerable Solvency Safety Intercept:** If personal metrics indicate financial vulnerability (`POOR` tier), an automated risk confirmation modal intercepts capital deployment into volatile equities until emergency cash runways are established.
+
+
+---
+
+## 📈 Step 02: Risk-Adaptive Quantitative Equity Engine
+
+Rather than offering generic stock screens, FinSight AI leverages a trained **Scikit-Learn Random Forest Classifier** to map multidimensional solvency indices to personalized risk profiles:
+
+- **Conservative:** High-solvency capital preservation focusing on blue-chip dividend compounders (`HDFCBANK.NS`, `ITC.NS`, `TCS.NS`, `RELIANCE.NS`), sovereign debt, and lower volatility anchors.
+- **Moderate:** Balanced growth targeting defensive large-caps combined with resilient mid-cap compounders (`INFY.NS`, `ICICIBANK.NS`, `BHARTIARTL.NS`, `LT.NS`).
+- **Aggressive:** Alpha generation strategies featuring momentum-driven high-beta equities (`BAJFINANCE.NS`, `TATAMOTORS.NS`, `TITAN.NS`, `LTIM.NS`) with strict stop triggers.
+- **Interactive Groww Charts:** In-app interactive price sheets with instant external browser fallbacks (`Open on Groww ↗`).
