@@ -148,3 +148,33 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 - **Interactive Swagger UI:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - **ReDoc Documentation:** [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 - **Health Check Probe:** [http://127.0.0.1:8000/healthz](http://127.0.0.1:8000/healthz) (`{"status": "healthy"}`)
+
+
+---
+
+## 📲 Expo Mobile & Web Simulator Guide
+
+The mobile application is built on **Expo SDK 51**, **React Native 0.74**, and **Expo Router v3**, featuring dark/gold executive theming, 100% in-app chart modals, and full offline fallback resilience.
+
+### 1. Prerequisites
+- **Node.js 20+ LTS**
+- **npm** or **bun**
+
+### 2. Environment Setup & Launch
+```bash
+# Navigate to the mobile workspace
+cd apps/mobile
+
+# Install client dependencies
+npm install
+
+# Option A: Launch In-Browser Web Simulator
+npx expo start --web --port 8081
+
+# Option B: Launch Native Tunnel / QR Code for Physical iOS & Android Devices (Expo Go)
+npx expo start --tunnel
+```
+
+### 3. Verification & Live Simulator Access
+- **Local Web Simulator:** Access the responsive mobile application frame directly at [http://localhost:8081](http://localhost:8081).
+- **Physical Device:** Open the **Expo Go** app on your phone and scan the Metro terminal QR code.
