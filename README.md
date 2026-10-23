@@ -193,3 +193,19 @@ The FastAPI microservice strictly validates inputs using **Pydantic v2** models:
 | `POST` | `/api/v1/recommend/` | Predicts ML risk profile & stock picks | `{ salary, credit_score, loan_amount, emergency_fund, risk_tolerance }` | `risk_tier`, `recommended_equities`, `allocation` |
 | `GET` | `/api/v1/market/nifty` | Real-time NIFTY 50 quotes & 14-day wave | _None_ | `current_price`, `change_percent`, `sparkline_14d` |
 | `POST` | `/api/v1/chat` | Contextual AI co-pilot NLP queries | `{ query, context: { health_tier, allocation } }` | `reply`, `suggestions`, `citations` |
+
+
+---
+
+## 👥 Contributors & Community
+
+- **Lead Architect:** [Aditthan J K](https://github.com/Aditthan-07)
+- **Repository:** [Aditthan-07/Investor_App](https://github.com/Aditthan-07/Investor_App)
+
+---
+
+## 📄 License & Regulatory Disclaimer
+
+This project is open-source under the terms of the [MIT License](LICENSE).
+
+> **Regulatory Disclaimer:** FinSight AI is an algorithmic decision-support tool created for educational and quantitative research purposes. It does not provide SEBI-registered investment advice or act as a licensed custodian. All financial market trading and equity investment entail risk of capital loss. Always perform independent due diligence before executing orders.
