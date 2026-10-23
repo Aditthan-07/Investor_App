@@ -45,3 +45,14 @@ Rather than offering generic stock screens, FinSight AI leverages a trained **Sc
 - **Moderate:** Balanced growth targeting defensive large-caps combined with resilient mid-cap compounders (`INFY.NS`, `ICICIBANK.NS`, `BHARTIARTL.NS`, `LT.NS`).
 - **Aggressive:** Alpha generation strategies featuring momentum-driven high-beta equities (`BAJFINANCE.NS`, `TATAMOTORS.NS`, `TITAN.NS`, `LTIM.NS`) with strict stop triggers.
 - **Interactive Groww Charts:** In-app interactive price sheets with instant external browser fallbacks (`Open on Groww ↗`).
+
+
+---
+
+## ⚖️ Step 03: Macro Capital Architecture & Rebalancing Policy
+
+Step 3 establishes the portfolio's top-level capital framework:
+
+- **Segmented SVG Donut Ring:** Multi-colored asset distribution dividing total net worth across Domestic Equities (Emerald `#10B981`), Sovereign Debt/Bonds (Champagne Gold `#C5A880`), Commodities/Gold (Warm Amber `#F59E0B`), and Liquid Cash Reserves (Slate Blue `#64748B`).
+- **Institutional Rebalancing Rules:** Automated threshold parameters triggering rebalancing notifications whenever an asset class deviates by more than **±5.0%** from target weight.
+- **Drift Tolerance Policies:** Preserves capital during market volatility by preventing premature churning while systematically locking in equity profits.
