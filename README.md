@@ -178,3 +178,18 @@ npx expo start --tunnel
 ### 3. Verification & Live Simulator Access
 - **Local Web Simulator:** Access the responsive mobile application frame directly at [http://localhost:8081](http://localhost:8081).
 - **Physical Device:** Open the **Expo Go** app on your phone and scan the Metro terminal QR code.
+
+
+---
+
+## 🔌 API Endpoint Contracts & Schemas
+
+The FastAPI microservice strictly validates inputs using **Pydantic v2** models:
+
+| Method | Endpoint | Description | Request Body Summary | Response Key Attributes |
+| :---: | :--- | :--- | :--- | :--- |
+| `GET` | `/healthz` | Microservice liveness & readiness probe | _None_ | `status: "healthy"` |
+| `POST` | `/api/v1/health` | Audits personal solvency & radar polygon | `{ salary, credit_score, has_loan, loan_amount, emergency_fund }` | `health_score`, `health_tier`, `radar_metrics` |
+| `POST` | `/api/v1/recommend/` | Predicts ML risk profile & stock picks | `{ salary, credit_score, loan_amount, emergency_fund, risk_tolerance }` | `risk_tier`, `recommended_equities`, `allocation` |
+| `GET` | `/api/v1/market/nifty` | Real-time NIFTY 50 quotes & 14-day wave | _None_ | `current_price`, `change_percent`, `sparkline_14d` |
+| `POST` | `/api/v1/chat` | Contextual AI co-pilot NLP queries | `{ query, context: { health_tier, allocation } }` | `reply`, `suggestions`, `citations` |
