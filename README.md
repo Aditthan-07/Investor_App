@@ -79,3 +79,35 @@ FinSight AI includes an embedded conversational assistant:
 - **Balance Sheet Memory:** Directly reads personal solvency outcomes to tailor recommendations without re-prompting.
 - **Quantitative Inquiry:** Real-time analysis of valuation multiples (P/E, P/B, EV/EBITDA), tax provisions (LTCG / STCG under Indian tax laws), and asset allocation trade-offs.
 - **Non-Custodial Guidance:** Advisory strictly focused on capital allocation discipline, liquidity safeguards, and risk management without unauthorized execution.
+
+
+---
+
+## 🏛️ Monorepo System Architecture
+
+```text
+┌────────────────────────────────────────────────────────┐
+│               FinSight AI Mobile Client                │
+│     (Expo SDK 51 / React Native / Expo Router v3)      │
+└───────────────────────────┬────────────────────────────┘
+                            │ REST / JSON (Axios)
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│             FastAPI Asynchronous Gateway               │
+├───────────────────────────┬────────────────────────────┤
+│ • Solvency Radar Service  │ • ML Inference Service     │
+│ • Yahoo Finance Cache     │ • Financial NLP Assistant  │
+└─────────────┬─────────────┴─────────────┬──────────────┘
+              │                           │
+              ▼                           ▼
+┌───────────────────────────┐ ┌──────────────────────────┐
+│   Random Forest Model     │ │   Yahoo Finance Feed     │
+│  (Scikit-Learn Joblib)    │ │   (Persistent Cache)     │
+└───────────────────────────┘ └──────────────────────────┘
+```
+
+The monorepo separates presentation, orchestration, and intelligence layers cleanly:
+- **`apps/mobile/`**: Cross-platform Expo 51 application running natively on iOS, Android, and web simulators with dark executive aesthetics.
+- **`apps/web/`**: Next.js 14 institutional desktop portal with interactive balance sheet audits, radar metrics, and market feeds.
+- **`backend/`**: Asynchronous FastAPI microservice serving ML predictions, live market ingestion, and solvency scoring.
+- **`investor_app.py`**: Standalone Streamlit engine with interactive visualizations and news sentiment analytics.
