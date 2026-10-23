@@ -111,3 +111,40 @@ The monorepo separates presentation, orchestration, and intelligence layers clea
 - **`apps/web/`**: Next.js 14 institutional desktop portal with interactive balance sheet audits, radar metrics, and market feeds.
 - **`backend/`**: Asynchronous FastAPI microservice serving ML predictions, live market ingestion, and solvency scoring.
 - **`investor_app.py`**: Standalone Streamlit engine with interactive visualizations and news sentiment analytics.
+
+
+---
+
+## ⚙️ Backend Microservice Setup Guide
+
+The asynchronous FastAPI backend powers solvency calculation, ML risk allocation, market feeds, and conversational AI.
+
+### 1. Prerequisites
+- **Python 3.11+** installed
+- SQLite3 or PostgreSQL
+
+### 2. Environment Setup & Launch
+```bash
+# Navigate to the backend directory
+cd backend
+
+# Create isolated Python virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+# macOS/Linux:
+source venv/bin/activate
+
+# Install locked production dependencies
+pip install -r requirements.txt
+
+# Start the asynchronous Uvicorn microservice
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+### 3. API Health & Interactive Documentation
+- **Interactive Swagger UI:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **ReDoc Documentation:** [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
+- **Health Check Probe:** [http://127.0.0.1:8000/healthz](http://127.0.0.1:8000/healthz) (`{"status": "healthy"}`)
