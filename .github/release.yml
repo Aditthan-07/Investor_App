@@ -1,0 +1,17 @@
+changelog:
+  categories:
+    - title: "🚀 Features & Enhancements"
+      labels:
+        - "feature"
+        - "enhancement"
+    - title: "🐛 Bug Fixes & Stability"
+      labels:
+        - "fix"
+        - "bugfix"
+    - title: "📱 Mobile Experience"
+      labels:
+        - "mobile"
+    - title: "📝 Documentation & Release"
+      labels:
+        - "documentation"
+        - "release"
