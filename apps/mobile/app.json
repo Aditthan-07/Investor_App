@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "FinSight AI",
+    "slug": "finsight-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "finsight",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0C0D10"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.finsight.investorapp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0C0D10"
+      },
+      "package": "com.finsight.investorapp",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6f8b9112-e234-4313-86d2-e77a6c30ce2a"
+      }
+    },
+    "owner": "aditthan"
+  }
+}
