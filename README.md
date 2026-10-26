@@ -49,7 +49,7 @@ An institutional-grade wealth management and solvency intelligence platform buil
 │   │   └── schemas/     # Pydantic validation contracts
 │   └── main.py          # FastAPI server entry point
 ├── docs/assets/         # Application screenshots and diagrams
-└── investor_app.py      # Standalone Streamlit engine
+└── backend/             # Quantitative microservices & ML models
 ```
 
 
