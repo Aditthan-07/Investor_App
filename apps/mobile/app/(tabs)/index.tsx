@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, G } from "react-native-svg";
 import {
   TrendingUp,
@@ -21,16 +22,21 @@ import {
   Sparkles,
   Sun,
   Moon,
+  User,
 } from "lucide-react-native";
 import { useApp } from "../../src/context/AppContext";
 import { fetchLiveNifty, NiftyUpdateResponse } from "../../src/services/api";
 import { ThemeColors } from "../../src/theme/colors";
 import { formatPct } from "../../src/utils/formatters";
 import { VersionBadge } from "../../src/components/VersionBadge";
+import { ProfileDrawer } from "../../src/components/ProfileDrawer";
+import { AuthModal } from "../../src/components/AuthModal";
 
 export default function DashboardScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
+    currentUser,
     isAudited,
     healthResult,
     recommendation,
@@ -45,6 +51,7 @@ export default function DashboardScreen() {
 
   const [nifty, setNifty] = useState<NiftyUpdateResponse | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const loadMarket = async () => {
     try {
@@ -88,7 +95,7 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: Math.max(insets.top, 18) }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.gold} />
@@ -106,6 +113,18 @@ export default function DashboardScreen() {
 
           {/* Right: Actions Grouped Together */}
           <View style={styles.actionGroup}>
+            <TouchableOpacity
+              style={styles.profileBtn}
+              onPress={() => setDrawerOpen(true)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              activeOpacity={0.8}
+            >
+              <User size={15} color={colors.gold} />
+              <Text numberOfLines={1} style={styles.profileBadgeText}>
+                {currentUser || "Guest Investor"}
+              </Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.themeToggleBtn}
               onPress={toggleTheme}
@@ -327,6 +346,12 @@ export default function DashboardScreen() {
         {/* In-App Version Badge */}
         <VersionBadge />
       </ScrollView>
+
+      {/* Profile Sidebar Drawer */}
+      <ProfileDrawer visible={drawerOpen} onClose={() => setDrawerOpen(false)} />
+
+      {/* Auth Gate Modal */}
+      <AuthModal />
     </SafeAreaView>
   );
 }
@@ -369,7 +394,25 @@ const createStyles = (colors: ThemeColors) =>
     actionGroup: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 10,
+      gap: 8,
+    },
+    profileBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      paddingHorizontal: 8,
+      paddingVertical: 7,
+      borderRadius: 10,
+      backgroundColor: colors.bgSurface,
+      borderWidth: 1,
+      borderColor: colors.borderAccent,
+    },
+    profileBadgeText: {
+      color: colors.gold,
+      fontSize: 11,
+      fontWeight: "700",
+      letterSpacing: 0.3,
+      maxWidth: 96,
     },
     themeToggleBtn: {
       width: 38,

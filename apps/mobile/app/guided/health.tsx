@@ -14,6 +14,7 @@ import {
   Modal,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Polygon, Line, Circle, Text as SvgText } from "react-native-svg";
 import {
   ChevronLeft,
@@ -168,6 +169,7 @@ function SolvencyRadar({
 
 export default function HealthScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const {
     colors,
     salary,
@@ -183,6 +185,7 @@ export default function HealthScreen() {
     healthResult,
     evaluatingHealth,
     auditSolvency,
+    saveCurrentInputs,
   } = useApp();
 
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -198,6 +201,24 @@ export default function HealthScreen() {
     loanAmount > 0 ? String(loanAmount) : ""
   );
   const [showPoorWarningModal, setShowPoorWarningModal] = useState<boolean>(false);
+
+  // Synchronize inputs when hydrated from persistent storage
+  useEffect(() => {
+    if (salary !== null && (!salaryInput || salaryInput === "0")) setSalaryInput(String(salary));
+    if (creditScore !== null && (!creditInput || creditInput === "0")) setCreditInput(String(creditScore));
+    if (loanAmount > 0 && (!loanInput || loanInput === "0")) setLoanInput(String(loanAmount));
+  }, [salary, creditScore, loanAmount]);
+
+  // Auto-persist balance sheet updates to local storage under active user
+  useEffect(() => {
+    saveCurrentInputs({
+      salary,
+      creditScore,
+      hasLoan,
+      loanAmount: hasLoan ? loanAmount : 0,
+      emergencyFund,
+    });
+  }, [salary, creditScore, hasLoan, loanAmount, emergencyFund]);
 
   // Smooth opacity & slide animation on evaluation reveal
   const resultFadeAnim = useRef(new Animated.Value(healthResult ? 1 : 0)).current;
@@ -301,7 +322,7 @@ export default function HealthScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: Math.max(insets.top, 24) }]}
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
